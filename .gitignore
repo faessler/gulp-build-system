@@ -1,0 +1,54 @@
+######################
+# COMPILED SOURCES
+######################
+*.com
+*.class
+*.dll
+*.exe
+*.dmg
+*.o
+*.so
+*.pyc
+*.iso
+*.zip
+*.jar
+*.rar
+*.tar
+*.7z
+
+
+
+######################
+# LOGS AND DATABASES
+######################
+*.log
+*.sql
+*.sqlite
+
+
+
+######################
+# OS FILES
+######################
+.DS_Store*
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Icon?
+
+
+
+######################
+# BUILD SYSTEMS
+######################
+node_modules/
+bower_components/
+.sass-cache
+*.css.map
+build/
+dist/
+!app/dist/
+typo3-import/
+temp/

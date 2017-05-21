@@ -1,0 +1,14 @@
+// ============================== //
+// VENDOR //
+// ============================== //
+@import "vendor/reset";
+@import "vendor/bootstrap";
+
+
+
+// ============================== //
+// IMPORTING OWN SCSS //
+// ============================== //
+@import "custom/variables";
+@import "custom/main";
+@import "custom/mobile";
