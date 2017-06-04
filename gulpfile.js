@@ -17,6 +17,7 @@ var cleanCSS     = require('gulp-clean-css');
 
 
 // JS
+var source = require('vinyl-source-stream');
 var browserify = require('browserify');
 
 // VARIABLES
@@ -34,12 +35,12 @@ var t3Dir          = './typo3-import';
 gulp.task('dist', ['dist-copy', 'dist-pug', 'dist-sass', 'dist-js']);
 
 // COPY DIST
-// gulp.task('dist-copy', function () {
-// 	return gulp
-// 		.src(buildDir+'/dist/**')
-// 		.pipe(gulp.dest(outputDir))
-// 		.pipe(browserSync.stream());
-// });
+gulp.task('dist-copy', function () {
+	return gulp
+		.src(appDir+'/public-root/**')
+		.pipe(gulp.dest(distDir))
+		.pipe(browserSync.stream());
+});
 
 // PUG
 gulp.task('dist-pug', function () {
@@ -65,11 +66,42 @@ gulp.task('dist-sass', function () {
 });
 
 // JAVASCRIPT
-// gulp.task('dist-js', function () {
-// 	return gulp
-// 		.src(buildDir+'/js/*.js')
-// 		.pipe(concat('main.min.js'))
-// 		.pipe(uglify())
-// 		.pipe(gulp.dest(outputDir+'/js'))
-// 		.pipe(browserSync.stream());
-// });
+gulp.task('dist-js', function() {
+	browserify({
+		entries: appDir+'/js/includes.js',
+		debug: true
+	})
+	.bundle()
+	.pipe(source('main.min.js'))
+	.pipe(gulp.dest(distDir+'/js/'))
+	.pipe(browserSync.stream());
+});
+
+
+// ===== BROWSER SYNC ===== //
+gulp.task('browser-sync', function() {
+	browserSync.init({
+		server: {
+			baseDir: distDir+'/'
+		}
+	});
+});
+
+
+
+// ======================================== //
+// WATCH TASKS FOR CHANGES
+// ======================================== //
+gulp.task('watch', function () {
+	gulp.watch(appDir+'/public-root/**', ['dist-copy']);
+	gulp.watch(appDir+'/pug/**', ['dist-pug']);
+	gulp.watch(appDir+'/scss/**', ['dist-sass']);
+	gulp.watch(appDir+'/js/**', ['dist-js']);
+});
+
+
+
+// ======================================== //
+// DEFAULT TASK
+// ======================================== //
+gulp.task('default', ['dist', 'browser-sync', 'watch']);
