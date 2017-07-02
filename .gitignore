@@ -52,3 +52,4 @@ dist/
 !app/dist/
 typo3-import/
 temp/
+.idea/
