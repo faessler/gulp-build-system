@@ -4,6 +4,9 @@
 var gulp        = require("gulp");
 var browserSync = require("browser-sync").create();
 
+// COPY
+var imagemin = require("gulp-imagemin");
+
 // PUG
 var pug = require("gulp-pug");
 
@@ -46,11 +49,30 @@ var t3Dir          = "./typo3-import";
 // ===== DIST ===== //
 gulp.task("dist", ["dist-copy", "dist-pug", "dist-sass", "dist-js"]);
 
-// COPY DIST
-gulp.task("dist-copy", function () {
+// COPY
+gulp.task("dist-copy", ["dist-copy-public-root", "dist-copy-images", "dist-copy-fonts"]);
+gulp.task("dist-copy-public-root", function () {
     return gulp
-        .src(appDir+"/public-root/**/*")
+        .src(appDir+"/public-root/**")
         .pipe(gulp.dest(distDir))
+        .pipe(browserSync.stream());
+});
+gulp.task("dist-copy-images", function () {
+    return gulp
+        .src(appDir+"/images/**")
+        .pipe(imagemin({
+            interlaced: true,
+            progressive: true,
+            optimizationLevel: 5,
+            svgoPlugins: [{removeViewBox: true}]
+        }))
+        .pipe(gulp.dest(distDir+"/img"))
+        .pipe(browserSync.stream());
+});
+gulp.task("dist-copy-fonts", function () {
+    return gulp
+        .src(appDir+"/fonts/**")
+        .pipe(gulp.dest(distDir+"/fonts"))
         .pipe(browserSync.stream());
 });
 
@@ -71,6 +93,7 @@ gulp.task("dist-sass", function () {
         .pipe(sass().on("error", sass.logError))
         .pipe(postcss([ autoprefixer() ]))
         .pipe(concat("main.min.css"))
+        .pipe(replace("../images/", "../img/"))
         .pipe(cleanCSS())
         .pipe(sourcemaps.write("./maps"))
         .pipe(gulp.dest(distDir+"/css"))
@@ -93,6 +116,25 @@ gulp.task("dist-js", function() {
 
 // ===== TYPO3 IMPORT ===== //
 gulp.task("t3", ["t3-copy", "t3-pug", "t3-sass", "t3-js"]);
+
+// COPY
+gulp.task("t3-copy", ["t3-copy-images", "t3-copy-fonts"]);
+gulp.task("t3-copy-images", function () {
+    return gulp
+        .src(appDir+"/images/**")
+        .pipe(imagemin({
+            interlaced: true,
+            progressive: true,
+            optimizationLevel: 5,
+            svgoPlugins: [{removeViewBox: true}]
+        }))
+        .pipe(gulp.dest(t3Dir+"/Resources/Public/Images"))
+});
+gulp.task("t3-copy-fonts", function () {
+    return gulp
+        .src(appDir+"/fonts/**")
+        .pipe(gulp.dest(t3Dir+"/Resources/Public/Fonts"))
+});
 
 // PUG
 gulp.task("t3-pug", ["t3-pug-templates-layout", "t3-pug-partials"]);
@@ -145,8 +187,11 @@ gulp.task("t3-sass", function () {
         .src(appDir+"/scss/includes.scss")
         .pipe(sass().on("error", sass.logError))
         .pipe(postcss([ autoprefixer() ]))
-        .pipe(cssbeautify({indent: "	", autosemicolon: true}))
+        .pipe(cssbeautify({indent: "    ", autosemicolon: true}))
         .pipe(concat("main.css"))
+        .pipe(replace("../fonts/", "../Fonts/"))
+        .pipe(replace("../images/", "../Images/"))
+        .pipe(replace("../img/", "../Images/"))
         .pipe(gulp.dest(t3Dir+"/Resources/Public/Css"));
 });
 
@@ -159,7 +204,6 @@ gulp.task("t3-js", function() {
         .bundle()
         .pipe(source("main.min.js"))
         .pipe(gulp.dest(t3Dir+"/Resources/Public/JavaScript"))
-        .pipe(browserSync.stream());
 });
 
 
@@ -179,7 +223,9 @@ gulp.task("browser-sync", function() {
 // WATCH TASKS FOR CHANGES
 // ======================================== //
 gulp.task("watch", function () {
-    gulp.watch(appDir+"/public-root/**", ["dist-copy"]);
+    gulp.watch(appDir+"/public-root/**", ["dist-copy-public-root"]);
+    gulp.watch(appDir+"/images/**", ["dist-copy-images"]);
+    gulp.watch(appDir+"/fonts/**", ["dist-copy-fonts"]);
     gulp.watch(appDir+"/pug/**", ["dist-pug"]);
     gulp.watch(appDir+"/scss/**", ["dist-sass"]);
     gulp.watch(appDir+"/js/**", ["dist-js"]);
