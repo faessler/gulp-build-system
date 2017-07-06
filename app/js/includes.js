@@ -1,7 +1,8 @@
 // ============================== //
 // GET SCRIPTS FROM MODULES //
 // ============================== //
-var $ = require('jquery');
+var jquery = require('jquery');
+global.$ = global.jQuery = jquery;
 
 
 

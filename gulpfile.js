@@ -46,6 +46,12 @@ var t3Dir          = "./typo3-import";
 // ======================================== //
 // TASKS
 // ======================================== //
+// ERROR HANDLER
+function handleError(err) {
+    console.log(err.toString());
+    this.emit('end');
+}
+
 // ===== DIST ===== //
 gulp.task("dist", ["dist-copy", "dist-pug", "dist-sass", "dist-js"]);
 
@@ -81,8 +87,10 @@ gulp.task("dist-pug", function () {
     return gulp
         .src(appDir+"/pug/layouts/*.pug")
         .pipe(pug({}))
+        .on("error", handleError)
         .pipe(gulp.dest(distDir))
         .pipe(browserSync.stream());
+    ;
 });
 
 // SASS
@@ -107,6 +115,7 @@ gulp.task("dist-js", function() {
         debug: true
     })
         .bundle()
+        .on("error", handleError)
         .pipe(source("main.min.js"))
         .pipe(gulp.dest(distDir+"/js/"))
         .pipe(browserSync.stream());
@@ -202,6 +211,7 @@ gulp.task("t3-js", function() {
         debug: true
     })
         .bundle()
+        .on("error", handleError)
         .pipe(source("main.min.js"))
         .pipe(gulp.dest(t3Dir+"/Resources/Public/JavaScript"))
 });
